@@ -1,7 +1,7 @@
 import json
 
 
-def _load_data(path) -> list[dict]:
+def load_data(path) -> list[dict]:
     """
     Функция возвращает список данные из файла.
     :param path:
@@ -19,7 +19,7 @@ def get_posts_all() -> list[dict]:
     :return: list[dict]
             данные из файл
     """
-    return _load_data('data/data.json')
+    return load_data('data/data.json')
 
 
 def get_posts_by_user(user_name: str) -> list[dict]:
@@ -30,7 +30,7 @@ def get_posts_by_user(user_name: str) -> list[dict]:
     :param user_name: str
     :return:
     """
-    all_posts = _load_data('data/data.json')
+    all_posts = load_data('data/data.json')
     if user_name not in get_users():
         raise ValueError('Нет такого пользователя')
     posts_by_user = []
@@ -49,7 +49,19 @@ def get_comments_by_post_id(post_id: int) -> list[dict]:
     :return: list[dict]
             список комментариев к посту
     """
-    all_comments = _load_data('data/comments.json')
+    # Загружаем данные
+    all_comments = load_data('data/comments.json')
+    all_posts = load_data('data/data.json')
+    # Выбираем из постов все значения 'pk'
+    pk_list = []
+    for post in all_posts:
+        pk_list.append(post['pk'])
+    # Если входящий параметр некорректного типа, либо не находится в списке значений pk, выводим ошибку
+    if type(post_id) != int:
+        raise ValueError('Некорректный идентификатор поста. Должно быть число, >= 1')
+    if post_id not in pk_list:
+        raise ValueError('Нет такого поста')
+    # Ищем комментарии к посту
     comments = []
     for comment in all_comments:
         if comment['post_id'] == post_id:
@@ -59,13 +71,13 @@ def get_comments_by_post_id(post_id: int) -> list[dict]:
 
 def search_for_posts(query: str) -> list[dict]:
     """
-    Функция возвращает список постов по ключевому слову
+    Функция возвращает список постов по ключевому слову, если ничего не найдено, возвращает пустой список
     :param query: str
             критерий поиска
     :return: list[dict]
             список найденных постов
     """
-    all_posts = _load_data('data/data.json')
+    all_posts = load_data('data/data.json')
     search_result = []
 
     for post in all_posts:
@@ -80,7 +92,7 @@ def get_post_by_pk(pk: int) -> dict:
     :param pk: int
     :return: dict
     """
-    all_posts = _load_data('data/data.json')
+    all_posts = load_data('data/data.json')
 
     for post in all_posts:
         if post['pk'] == pk:
@@ -88,8 +100,8 @@ def get_post_by_pk(pk: int) -> dict:
 
 
 def get_users() -> set:
-    all_comments = _load_data('data/comments.json')
-    all_posts = _load_data('data/data.json')
+    all_comments = load_data('data/comments.json')
+    all_posts = load_data('data/data.json')
     users = []
     for comment in all_comments:
         users.append(comment['commenter_name'])
